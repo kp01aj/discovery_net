@@ -1,0 +1,12 @@
+# Archivos de informes generados automáticamente
+informe_ping_*.txt
+/informes/
+
+# Archivos temporales de sistema
+*.swp
+*.tmp
+*.log
+
+# Archivos de sistema comunes
+.DS_Store
+Thumbs.db
