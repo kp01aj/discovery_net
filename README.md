@@ -16,3 +16,28 @@ Clona el repositorio y da permisos de ejecución al script:
 git clone https://github.com/usuario/discovery_ping.git
 cd discovery_ping
 chmod +x discovery_ping.sh
+```
+
+## ▶️ Uso
+
+Edita el archivo `redes.txt` con tus IPs (una por línea).
+
+Ejecuta el script indicando el archivo de entrada:
+
+```bash
+./discovery_ping.sh redes.txt
+```
+
+## ⚠️ Requisitos
+```
+Linux / Unix con bash
+```
+
+Permisos para usar ping -b (puede requerir sudo en algunas distros)
+
+## ✍️ Autor:
+```
+Angel J. Reynoso
+KernelPanic01
+kp01aj@gmail.com
+```
