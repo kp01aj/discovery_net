@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Discovery Ping Script
-# Autor: Angel J. Reynoso
+# Autor: KernelPanic01 - Angel J. Reynoso
+# kp01aj@gmai.com
 # Descripción:
 #   Lee un archivo de texto con una lista de IPs (una por línea),
 #   realiza ping broadcast (-b) a cada una,
