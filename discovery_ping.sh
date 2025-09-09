@@ -1,65 +1,108 @@
 #!/bin/bash
+# Discovery Ping Script (CIDR-aware)
+# Autor: Angel J. Reynoso (KernelPanic01)
+# Uso: ./discovery_ping.sh redes.txt
 
-# Discovery Ping Script
-# Autor: KernelPanic01 - Angel J. Reynoso
-# kp01aj@gmai.com
-# Descripción:
-#   Lee un archivo de texto con una lista de IPs (una por línea),
-#   realiza ping broadcast (-b) a cada una,
-#   marca si responde o no, y al final genera un informe.
+set -euo pipefail
 
 if [ $# -ne 1 ]; then
-    echo "Uso: $0 network.txt"
-    exit 1
+  echo "Uso: $0 archivo_redes.txt"
+  exit 1
 fi
 
 archivo="$1"
-
 if [ ! -f "$archivo" ]; then
-    echo "❌ El archivo $archivo no existe."
-    exit 1
+  echo "❌ El archivo '$archivo' no existe."
+  exit 1
 fi
+
+# === Helper: broadcast de una red CIDR usando Python (ipaddress) ===
+get_broadcast() {
+  local cidr="$1"
+  python3 - "$cidr" <<'PY'
+import sys, ipaddress
+cidr = sys.argv[1]
+net = ipaddress.ip_network(cidr, strict=False)
+print(net.broadcast_address)
+PY
+}
 
 alcanzadas=()
 no_alcanzadas=()
 
-while IFS= read -r ip; do
-    [[ -z "$ip" || "$ip" =~ ^# ]] && continue
+INTENTOS=5
+TIMEOUT=1   # segundos
 
-    echo "🔍 Probando $ip ..."
-    ok=0
-    for i in {1..5}; do
-        if ping -b -c 1 -W 1 "$ip" >/dev/null 2>&1; then
-            echo "✅ Host vivo encontrado en $ip"
-            alcanzadas+=("$ip")
-            ok=1
-            break
-        fi
-    done
+while IFS= read -r linea; do
+  # Saltar vacías/comentarios
+  [[ -z "${linea// }" || "$linea" =~ ^# ]] && continue
 
-    if [ $ok -eq 0 ]; then
-        echo "❌ No responde $ip"
-        no_alcanzadas+=("$ip")
+  objetivo="$linea"
+
+  if [[ "$objetivo" == */* ]]; then
+    # --- Es una red CIDR ---
+    # Validar/obtener broadcast
+    if ! bcast="$(get_broadcast "$objetivo" 2>/dev/null)"; then
+      echo "⚠️  CIDR inválido: $objetivo"
+      no_alcanzadas+=("$objetivo (CIDR inválido)")
+      continue
     fi
+
+    echo "🔍 Probando red $objetivo (broadcast $bcast) ..."
+    ok=0
+    for ((i=1; i<=INTENTOS; i++)); do
+      if ping -b -c 1 -W "$TIMEOUT" "$bcast" >/dev/null 2>&1; then
+        echo "✅ Respuesta en la red $objetivo (via broadcast $bcast)"
+        alcanzadas+=("$objetivo")
+        ok=1
+        break
+      fi
+    done
+    if [ $ok -eq 0 ]; then
+      echo "❌ Sin respuesta en la red $objetivo (broadcast $bcast)"
+      no_alcanzadas+=("$objetivo")
+    fi
+
+  else
+    # --- Es una IP ---
+    echo "🔍 Probando host $objetivo ..."
+    ok=0
+    for ((i=1; i<=INTENTOS; i++)); do
+      if ping -c 1 -W "$TIMEOUT" "$objetivo" >/dev/null 2>&1; then
+        echo "✅ Host vivo $objetivo"
+        alcanzadas+=("$objetivo")
+        ok=1
+        break
+      fi
+    done
+    if [ $ok -eq 0 ]; then
+      echo "❌ No responde $objetivo"
+      no_alcanzadas+=("$objetivo")
+    fi
+  fi
+
 done < "$archivo"
 
-# Carpeta de reportes
-reporte="informe_ping_$(date +%Y%m%d_%H%M%S).txt"
+echo
+mkdir -p informes
+reporte="informes/informe_ping_$(date +%Y%m%d_%H%M%S).txt"
 
 {
-echo "📄 ===== INFORME FINAL ====="
-echo
-echo "✅ Redes alcanzadas:"
-for ip in "${alcanzadas[@]}"; do
-    echo "  - $ip"
-done
-
-echo
-echo "❌ Redes NO alcanzadas:"
-for ip in "${no_alcanzadas[@]}"; do
-    echo "  - $ip"
-done
+  echo "📄 ===== INFORME FINAL ====="
+  echo
+  echo "✅ Objetivos alcanzados:"
+  if [ ${#alcanzadas[@]} -eq 0 ]; then
+    echo "  (ninguno)"
+  else
+    for x in "${alcanzadas[@]}"; do echo "  - $x"; done
+  fi
+  echo
+  echo "❌ Objetivos NO alcanzados:"
+  if [ ${#no_alcanzadas[@]} -eq 0 ]; then
+    echo "  (ninguno)"
+  else
+    for x in "${no_alcanzadas[@]}"; do echo "  - $x"; done
+  fi
 } | tee "$reporte"
 
-echo
 echo "📂 Informe guardado en: $reporte"
