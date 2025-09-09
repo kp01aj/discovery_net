@@ -1,4 +1,4 @@
-# 🛰️ Discovery Ping Script
+# 🛰️ Discovery Net Script
 
 Script en **Bash** para realizar un descubrimiento de hosts activos dentro de una lista de redes/IPs.  
 Permite identificar rápidamente direcciones alcanzables y generar un **informe automático**.
