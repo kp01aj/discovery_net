@@ -1,4 +1,4 @@
-# 🛰️ Discovery Net Script
+# 🛰️ Discovery Net
 
 Script en **Bash** para realizar un descubrimiento de hosts activos dentro de una lista de redes/IPs.  
 Permite identificar rápidamente direcciones alcanzables y generar un **informe automático**.
@@ -10,16 +10,16 @@ Permite identificar rápidamente direcciones alcanzables y generar un **informe 
 - Opcionalmente puede recorrer el **100% de la red** y listar todos los hosts activos.  
 - Permite usar **nmap discovery** como motor alternativo en caso de que ICMP/fping esté bloqueado.  
 - Muestra progreso con IPs probadas y porcentaje de avance.  
-- Genera un **informe final** en pantalla y en un archivo con fecha (`informe_ping_YYYYMMDD_HHMMSS.txt`).  
+- Genera un **informe final** en pantalla y en un archivo con fecha (`informe_net_YYYYMMDD_HHMMSS.txt`).  
 - Salta líneas vacías o comentarios con `#`.  
 
 ## 🚀 Instalación
 Clona el repositorio y da permisos de ejecución al script:
 
 ```bash
-git clone https://github.com/kp01aj/discovery_ping.git
-cd discovery_ping
-chmod +x discovery_ping.sh
+git clone https://github.com/kp01aj/discovery_net.git
+cd discovery_net
+chmod +x discovery_net.sh
 ```
 
 ## ▶️ Uso
@@ -29,25 +29,25 @@ Edita el archivo `redes.txt` con tus IPs/redes (una por línea).
 ### Ejecución básica (modo por defecto)
 Usa **fping** y se detiene en el primer host encontrado en cada red:
 ```bash
-./discovery_ping.sh redes.txt
+./discovery_net.sh redes.txt
 ```
 
 ### Revisar el 100% de la red
 Escanea todos los hosts de cada red y lista los activos:
 ```bash
-./discovery_ping.sh -m full redes.txt
+./discovery_net.sh -m full redes.txt
 ```
 
 ### Usar nmap discovery
 Cuando ICMP está bloqueado y fping no funciona, usa `nmap -sn`:
 ```bash
-./discovery_ping.sh -e nmap redes.txt
+./discovery_net.sh -e nmap redes.txt
 ```
 
 ### Ajustar sensibilidad de fping
 Aumentar el timeout a 800ms y permitir 1 reintento por host:
 ```bash
-./discovery_ping.sh -t 800 -r 1 redes.txt
+./discovery_net.sh -t 800 -r 1 redes.txt
 ```
 
 ## ⚠️ Requisitos
