@@ -13,7 +13,7 @@ Permite identificar qué direcciones están activas y genera un **informe autom�
 Clona el repositorio y da permisos de ejecución al script:
 
 ```bash
-git clone https://github.com/usuario/discovery_ping.git
+git clone https://github.com/kp01aj/discovery_ping.git
 cd discovery_ping
 chmod +x discovery_ping.sh
 ```
